@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: tron_staking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tron_staking_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - tron-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - tron-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-tron_staking_password}@postgres:5432/tron_staking
+      - REDIS_URL=redis://redis:6379
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - WEBAPP_URL=${WEBAPP_URL:-https://obtain-api.online}
+      - ADMIN_WEBAPP_URL=${ADMIN_WEBAPP_URL:-https://admin.obtain-api.online}
+      - TRON_API_KEY=${TRON_API_KEY}
+      - TRON_NETWORK=${TRON_NETWORK:-mainnet}
+      - DEPOSIT_ADDRESS=${DEPOSIT_ADDRESS}
+      - HOT_WALLET_PRIVATE_KEY=${HOT_WALLET_PRIVATE_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - tron-network
+    volumes:
+      - ./logs:/app/logs
+
+  # Telegram Bot
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-tron_staking_password}@postgres:5432/tron_staking
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - WEBAPP_URL=${WEBAPP_URL:-https://obtain-api.online}
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    restart: unless-stopped
+    networks:
+      - tron-network
+
+  # TRON Monitor Service
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.monitor
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-tron_staking_password}@postgres:5432/tron_staking
+      - TRON_API_KEY=${TRON_API_KEY}
+      - TRON_NETWORK=${TRON_NETWORK:-mainnet}
+      - DEPOSIT_ADDRESS=${DEPOSIT_ADDRESS}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - tron-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - tron-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  nginx_logs:
+
+networks:
+  tron-network:
+    driver: bridge

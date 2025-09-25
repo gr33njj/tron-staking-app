@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRON Staking Platform</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=5.5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading" class="loading-screen">
+            <div class="tron-loader">
+                <div class="tron-ring"></div>
+                <div class="tron-ring"></div>
+                <div class="tron-ring"></div>
+                <div class="tron-text">TRON</div>
+            </div>
+            <p class="loading-text">Initializing Quantum Network...</p>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="main-app hidden">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <span class="logo-text">STAKING TRC20</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="lang-switch" id="langSwitch">
+                            <span class="lang-flag">🌐</span>
+                            <span class="lang-text" data-key="language">EN</span>
+                        </button>
+                        <button class="notification-btn" id="notificationBtn" onclick="toggleNotifications()">
+                            <span class="notification-icon">🔔</span>
+                            <span class="notification-badge hidden" id="notificationCount">0</span>
+                            <div class="notification-dropdown hidden" id="notificationDropdown">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Navigation -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="dashboard">
+                    <span class="tab-icon">🏠</span>
+                    <span data-key="dashboard">Dashboard</span>
+                </button>
+                <button class="nav-tab" data-tab="deposit">
+                    <span class="tab-icon">💳</span>
+                    <span data-key="deposit">Deposit</span>
+                </button>
+                <button class="nav-tab" data-tab="withdraw">
+                    <span class="tab-icon">💸</span>
+                    <span data-key="withdraw">Withdraw</span>
+                </button>
+                <button class="nav-tab" data-tab="history">
+                    <span class="tab-icon">📊</span>
+                    <span data-key="history">History</span>
+                </button>
+                <button class="nav-tab" data-tab="howitworks">
+                    <span class="tab-icon">⚙️</span>
+                    <span data-key="how_it_works">How it works</span>
+                </button>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="content">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="balance-card">
+                        <div class="balance-header">
+                            <h2 data-key="total_balance">Total Balance</h2>
+                            <div class="balance-refresh" id="refreshBalance">
+                                <span class="refresh-icon">🔄</span>
+                            </div>
+                        </div>
+                        <div class="balance-amount">
+                            <span class="currency-symbol">$</span>
+                            <span class="amount" id="totalBalance">0.00</span>
+                            <span class="currency">USDT</span>
+                        </div>
+                        <div class="balance-details">
+                            <div class="balance-item">
+                                <span data-key="approved_deposits">Approved Deposits</span>
+                                <span id="approvedDeposits">0.00 USDT</span>
+                            </div>
+                            <div class="balance-item">
+                                <span data-key="total_accruals">Total Accruals</span>
+                                <span id="totalAccruals">0.00 USDT</span>
+                            </div>
+                            <div class="balance-item">
+                                <span data-key="pending_deposits">Pending Deposits</span>
+                                <span id="pendingDeposits">0.00 USDT</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="stats-card">
+                            <div class="card-header">
+                                <h3 data-key="recent_activity">Recent Activity</h3>
+                            </div>
+                            <div class="activity-list" id="recentActivity">
+                                <!-- Activity items will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="stats-card">
+                            <div class="card-header">
+                                <h3 data-key="earnings_overview">Earnings Overview</h3>
+                                <div class="earnings-status">
+                                    <span class="status-indicator active"></span>
+                                    <span data-key="live_status">Live</span>
+                                </div>
+                            </div>
+                            <div class="trading-activity">
+                                <div class="activity-header">
+                                    <span data-key="time">Time</span>
+                                    <span data-key="pool_id">Pool ID</span>
+                                    <span data-key="profit">Profit</span>
+                                </div>
+                                <div class="activity-list" id="tradingActivityList">
+                                    <!-- Trading activities will be generated here -->
+                                </div>
+                            </div>
+                            <div class="earnings-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label" data-key="total_pools">Total Pools</span>
+                                    <span class="stat-value" id="totalPools">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label" data-key="avg_profit">Avg Profit</span>
+                                    <span class="stat-value" id="avgProfit">0%</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label" data-key="active_pools">Active Pools</span>
+                                    <span class="stat-value" id="activePools">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="action-btn primary" onclick="switchTab('deposit')">
+                            <span class="btn-icon">💳</span>
+                            <span data-key="make_deposit">Make Deposit</span>
+                        </button>
+                        <button class="action-btn secondary" onclick="switchTab('withdraw')">
+                            <span class="btn-icon">💸</span>
+                            <span data-key="request_withdrawal">Request Withdrawal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Deposit Tab -->
+                <div id="deposit" class="tab-content">
+                    <div class="deposit-container">
+                        <div class="deposit-card">
+                            <div class="card-header">
+                                <h2 data-key="deposit_usdt">Deposit USDT</h2>
+                                <p data-key="deposit_description">Send USDT TRC-20 to start earning</p>
+                            </div>
+
+                            <div class="deposit-info">
+                                <div class="qr-section">
+                                    <div class="qr-code" id="qrCode">
+                                        <!-- QR code will be loaded here -->
+                                    </div>
+                                    <p data-key="scan_qr">Scan QR code or copy address</p>
+                                </div>
+
+                                <div class="address-section">
+                                    <label data-key="deposit_address">Deposit Address (TRC-20)</label>
+                                    <div class="address-input">
+                                        <input type="text" id="depositAddress" readonly>
+                                        <button class="copy-btn" onclick="copyAddress()">
+                                            <span data-key="copy">Copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="network-info">
+                                    <div class="info-item">
+                                        <span data-key="network">Network:</span>
+                                        <span class="highlight">TRON (TRC-20)</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span data-key="token">Token:</span>
+                                        <span class="highlight">USDT</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span data-key="min_confirmations">Min Confirmations:</span>
+                                        <span class="highlight">19</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="submit-section">
+                                <h3 data-key="submit_transaction">Submit Transaction</h3>
+                                <form id="depositForm">
+                                    <div class="form-group">
+                                        <label data-key="transaction_hash">Transaction Hash</label>
+                                        <input type="text" id="txHash" placeholder="Enter transaction hash" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label data-key="comment_optional">Comment (Optional)</label>
+                                        <textarea id="comment" placeholder="Add any comments..."></textarea>
+                                    </div>
+                                    <button type="submit" class="submit-btn">
+                                        <span data-key="submit_deposit">Submit Deposit</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdraw Tab -->
+                <div id="withdraw" class="tab-content">
+                    <div class="withdraw-container">
+                        <div class="withdraw-card">
+                            <div class="card-header">
+                                <h2 data-key="request_withdrawal">Request Withdrawal</h2>
+                                <p data-key="withdraw_description">Withdraw your earnings to your wallet</p>
+                            </div>
+
+                            <div class="available-balance">
+                                <div class="balance-info">
+                                    <span data-key="available_balance">Available Balance:</span>
+                                    <span class="balance-amount" id="availableBalance">0.00 USDT</span>
+                                </div>
+                            </div>
+
+                            <form id="withdrawForm">
+                                <div class="form-group">
+                                    <label data-key="withdrawal_amount">Withdrawal Amount</label>
+                                    <div class="amount-input">
+                                        <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="0" required>
+                                        <span class="currency-label">USDT</span>
+                                        <button type="button" class="max-btn" onclick="setMaxAmount()">
+                                            <span data-key="max">MAX</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label data-key="withdrawal_address">Withdrawal Address</label>
+                                    <input type="text" id="withdrawAddress" placeholder="Enter TRON address (TRC-20)" required>
+                                    <small data-key="address_warning">⚠️ Make sure the address is correct. Transactions cannot be reversed.</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label data-key="withdrawal_type">Withdrawal Type</label>
+                                    <div class="withdrawal-types">
+                                        <label class="radio-option">
+                                            <input type="radio" name="withdrawalType" value="regular" checked>
+                                            <span class="radio-custom"></span>
+                                            <span data-key="regular_withdrawal">Regular Withdrawal</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="withdrawalType" value="early">
+                                            <span class="radio-custom"></span>
+                                            <span data-key="early_withdrawal">Early Withdrawal</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="withdrawal-summary">
+                                    <div class="summary-item">
+                                        <span data-key="withdrawal_amount">Withdrawal Amount:</span>
+                                        <span id="summaryAmount">0.00 USDT</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span data-key="network_fee">Network Fee:</span>
+                                        <span>~1 TRX</span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="submit-btn">
+                                    <span data-key="submit_withdrawal">Submit Withdrawal Request</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div id="history" class="tab-content">
+                    <div class="history-container">
+                        <div class="history-header">
+                            <h2 data-key="transaction_history">Transaction History</h2>
+                            <div class="history-filters">
+                                <select id="historyFilter">
+                                    <option value="all" data-key="all_transactions">All Transactions</option>
+                                    <option value="deposits" data-key="deposits">Deposits</option>
+                                    <option value="withdrawals" data-key="withdrawals">Withdrawals</option>
+                                    <option value="accruals" data-key="accruals">Accruals</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="history-list" id="historyList">
+                            <!-- History items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How it works Tab -->
+                <div id="howitworks" class="tab-content">
+                    <div class="how-container">
+                        <div class="how-card">
+                            <h2 data-key="how_title">How it works</h2>
+                            <div class="how-steps">
+                                <div class="how-step">
+                                    <div class="how-emoji">💰</div>
+                                    <div class="how-text" data-key="how_step_1">You deposit USDT here.</div>
+                                </div>
+                                <div class="how-step">
+                                    <div class="how-emoji">🔁</div>
+                                    <div class="how-text" data-key="how_step_2">Funds go to a liquid pool of margin requests on T2/T3 exchanges.</div>
+                                </div>
+                                <div class="how-step">
+                                    <div class="how-emoji">📈</div>
+                                    <div class="how-text" data-key="how_step_3">They are rented by users for a fee, and profit is distributed when the pool is fully utilized (avg 2–5% weekly).</div>
+                                </div>
+                                <div class="how-step">
+                                    <div class="how-emoji">📅</div>
+                                    <div class="how-text" data-key="how_step_4">Plan your withdrawals so you receive funds right after distribution.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Modals -->
+        <div id="successModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 data-key="success">Success!</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 data-key="error">Error</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notificationsModal" class="notification-modal">
+        <div class="notification-modal-content">
+            <div class="notification-modal-header">
+                <h3 data-key="notifications">Notifications</h3>
+                <button class="notification-modal-close" onclick="closeNotifications()">&times;</button>
+            </div>
+            <div class="notification-modal-body" id="notificationModalBody">
+                <!-- Notifications will be loaded here -->
+            </div>
+            <div class="notification-modal-footer">
+                <button class="notification-mark-all-btn" onclick="markAllAsRead()" data-key="mark_all_read">Mark All as Read</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/translations.js?v=2.1"></script>
+    <script src="/static/js/api.js?v=2.1"></script>
+    <script src="/static/js/app.js?v=2.1"></script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRON Staking - Admin Panel</title>
+    <link rel="stylesheet" href="/static/css/admin.css?v=20250924-1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="logo">
+                        <span class="logo-text">TRON</span>
+                        <span class="logo-subtitle">Admin Panel</span>
+                    </div>
+                </div>
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <span>Access System</span>
+                        <div class="login-loader hidden">⟳</div>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="admin-dashboard hidden">
+            <!-- Header -->
+            <header class="admin-header">
+                <div class="header-content">
+                    <div class="logo">
+                        <span class="logo-text">TRON</span>
+                        <span class="logo-subtitle">Admin Panel</span>
+                    </div>
+                    <div class="header-actions">
+                        <div class="admin-info">
+                            <span id="adminUsername">Admin</span>
+                        </div>
+                        <button class="logout-btn" id="logoutBtn">
+                            <span>🚪</span>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Navigation -->
+            <nav class="admin-nav">
+                <button class="nav-item active" data-tab="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </button>
+                <button class="nav-item" data-tab="deposits">
+                    <span class="nav-icon">💳</span>
+                    <span>Deposits</span>
+                    <span class="badge" id="pendingDepositsBadge">0</span>
+                </button>
+                <button class="nav-item" data-tab="withdrawals">
+                    <span class="nav-icon">💸</span>
+                    <span>Withdrawals</span>
+                    <span class="badge" id="pendingWithdrawalsBadge">0</span>
+                </button>
+                <button class="nav-item" data-tab="accruals">
+                    <span class="nav-icon">🎯</span>
+                    <span>Accruals</span>
+                </button>
+                <button class="nav-item" data-tab="users">
+                    <span class="nav-icon">👥</span>
+                    <span>Users</span>
+                </button>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="admin-content">
+                <!-- Overview Tab -->
+                <div id="overview" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalUsers">0</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalDeposits">0.00</div>
+                                <div class="stat-label">Total Deposits (USDT)</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalAccruals">0.00</div>
+                                <div class="stat-label">Total Accruals (USDT)</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💸</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalWithdrawals">0.00</div>
+                                <div class="stat-label">Total Withdrawals (USDT)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <div class="card-header">
+                                <h3>Pending Actions</h3>
+                                <button class="refresh-btn" onclick="refreshOverview()">🔄</button>
+                            </div>
+                            <div class="pending-list" id="pendingActions">
+                                <!-- Pending actions will be loaded here -->
+                            </div>
+                        </div>
+
+                        <div class="overview-card">
+                            <div class="card-header">
+                                <h3>Recent Activity</h3>
+                            </div>
+                            <div class="activity-list" id="recentActivity">
+                                <!-- Recent activity will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposits Tab -->
+                <div id="deposits" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Deposit Management</h2>
+                        <div class="tab-actions">
+                            <select id="depositStatusFilter">
+                                <option value="all">All Deposits</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <button class="refresh-btn" onclick="loadDeposits()">🔄</button>
+                        </div>
+                    </div>
+                    <div class="deposits-list" id="depositsList">
+                        <!-- Deposits will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Withdrawals Tab -->
+                <div id="withdrawals" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Withdrawal Management</h2>
+                        <div class="tab-actions">
+                            <select id="withdrawalStatusFilter">
+                                <option value="all">All Withdrawals</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <button class="refresh-btn" onclick="loadWithdrawals()">🔄</button>
+                        </div>
+                    </div>
+                    <div class="withdrawals-list" id="withdrawalsList">
+                        <!-- Withdrawals will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Accruals Tab -->
+                <div id="accruals" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Accrual Management</h2>
+                        <div class="tab-actions">
+                            <button class="primary-btn" onclick="showAddAccrualModal()">
+                                <span>+</span>
+                                Add Accrual
+                            </button>
+                        </div>
+                    </div>
+                    <div class="accruals-container">
+                        <div class="bulk-accrual-card">
+                            <h3>Bulk Accrual</h3>
+                            <form id="bulkAccrualForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Percentage of User Balance (%)</label>
+                                        <input type="number" id="bulkPercentage" step="0.1" min="0" max="100" required>
+                                        <small>Percentage of each user's current balance</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <input type="text" id="bulkDescription" placeholder="e.g., Weekly earnings" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-btn">
+                                    Apply to All Active Users
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="accruals-list" id="accrualsList">
+                            <!-- Recent accruals will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="users" class="tab-content">
+                    <div class="tab-header">
+                        <h2>User Management</h2>
+                        <div class="tab-actions">
+                            <input type="text" id="userSearch" placeholder="Search users...">
+                            <button class="refresh-btn" onclick="loadUsers()">🔄</button>
+                        </div>
+                    </div>
+                    <div class="users-list" id="usersList">
+                        <!-- Users will be loaded here -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Modals -->
+        
+        <!-- Deposit Detail Modal -->
+        <div id="depositModal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>Deposit Details</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" id="depositModalBody">
+                    <!-- Deposit details will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Detail Modal -->
+        <div id="withdrawalModal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>Withdrawal Details</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" id="withdrawalModalBody">
+                    <!-- Withdrawal details will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Accrual Modal -->
+        <div id="addAccrualModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Individual Accrual</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccrualForm">
+                        <div class="form-group">
+                            <label>User</label>
+                            <select id="accrualUserId" required>
+                                <option value="">Select user...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (USDT)</label>
+                            <input type="number" id="accrualAmount" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="accrualDescription" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Admin Comment</label>
+                            <textarea id="accrualComment" placeholder="Internal notes..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Accrual</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Modals -->
+        <div id="successModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header success">
+                    <h3>✅ Success</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header error">
+                    <h3>❌ Error</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/admin-api.js?v=1.4"></script>
+    <script src="/static/js/admin.js?v=1.4"></script>
+</body>
+</html>

@@ -193,7 +193,7 @@ ADMIN_DOMAIN=admin.obtain-api.online
 /setmenubutton
 @your_bot_name
 🌐 Open App
-https://obtain-api.online
+https://example.com
 ```
 
 ### Настройка TRON API:
@@ -416,20 +416,6 @@ docker network inspect tron-staking_tron-network
 # Проверка volumes
 docker volume ls
 ```
-
-## 📞 Поддержка
-
-### Контакты:
-- **Email**: support@obtain-api.online
-- **Telegram**: @support
-
-### Документация:
-- **API Docs**: http://your-server:8000/docs
-- **GitHub**: [Repository URL]
-
-## 📄 Лицензия
-
-MIT License - подробности в файле LICENSE
 
 ## 🙏 Благодарности
 

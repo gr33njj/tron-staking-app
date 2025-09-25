@@ -242,10 +242,10 @@ chmod +x deploy.sh
 ```
 
 ### Проверка:
-- WebApp: https://obtain-api.online
-- Admin: https://admin.obtain-api.online
-- API Docs: https://obtain-api.online/docs
-- Health: https://obtain-api.online/health
+- WebApp: https://example.com
+- Admin: https://admin.example.com
+- API Docs: https://example.com/docs
+- Health: https://example.com/health
 
 ## 📞 Поддержка
 
